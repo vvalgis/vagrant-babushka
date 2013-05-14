@@ -5,11 +5,12 @@ require 'vagrant-babushka/version'
 
 Gem::Specification.new do |gem|
   gem.name          = "vagrant-babushka"
-  gem.version       = Vagrant::Babushka::VERSION
+  gem.version       = VagrantPlugins::Babushka::VERSION
+  gem.platform      = Gem::Platform::RUBY
   gem.authors       = ["Vladimir Valgis"]
   gem.email         = ["vladimir.valgis@gmail.com"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
+  gem.description   = %q{Vagrant provisioner plugin for using Babushka}
+  gem.summary       = %q{Vagrant provisioner plugin for using Babushka}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($/)
