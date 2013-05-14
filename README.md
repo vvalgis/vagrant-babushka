@@ -1,20 +1,13 @@
-# Vagrant::Babushka
+# Vagrant Babushka Provisioner
+
+Based on plugin created by @tcurdt
+https://github.com/tcurdt/vagrant-boxes/blob/master/plugins/babushka_provisioner.rb
 
 TODO: Write a gem description
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
-    gem 'vagrant-babushka'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install vagrant-babushka
+    $ vagrant plugin install vagrant-babushka
 
 ## Usage
 
@@ -27,3 +20,7 @@ TODO: Write usage instructions here
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+## License
+
+MIT
