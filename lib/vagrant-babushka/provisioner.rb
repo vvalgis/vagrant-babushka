@@ -8,20 +8,19 @@ module VagrantPlugins
 
       def configure(root_config)
         @hostname = root_config.vm.hostname
+        if @config.local_deps_path
+          local_path = @config.local_deps_path
+          remote_path = '/home/vagrant/babushka-deps'
+          opts = {id: 'babushka_deps', nfs: false}
+          root_config.vm.synced_folder local_path, remote_path, opts
+        end
       end
 
       def provision
         bootstrap_babushka! unless @machine.communicate.test('babushka --version')
- 
-        commands = @config.deps.map do |(dep_name, dep_args)|
+        @config.deps.map do |(dep_source, dep_name, dep_args)|
           args = dep_args.to_a.map { |k, v| "#{k}='#{v}'" }.join(' ')
-          "babushka --update --defaults --colour '#{dep_name}' #{args}"
-        end
-        commands.each do |command|
-          @machine.communicate.sudo(command) do |type, data|
-            color = type == :stdout ? :green : :red
-            @machine.env.ui.info(data.chomp, :color => color, :prefix => false)
-          end
+          run_remote "babushka --update --defaults --colour #{dep_source}'#{dep_name}' #{args}"
         end
       end
 
@@ -33,7 +32,11 @@ module VagrantPlugins
         local_tmpfile = remote_tmpfile = "/tmp/babushka_me_up"
         File.open(local_tmpfile, 'w') {|f| f.write `curl https://babushka.me/up` }
         @machine.communicate.upload(local_tmpfile, remote_tmpfile)
-        @machine.communicate.sudo("bash #{remote_tmpfile}") do |type, data|
+        run_remote "bash #{remote_tmpfile}"
+      end
+
+      def run_remote(command)
+        @machine.communicate.sudo(command) do |type, data|
           color = type == :stdout ? :green : :red
           @machine.env.ui.info(data.chomp, :color => color, :prefix => false)
         end
