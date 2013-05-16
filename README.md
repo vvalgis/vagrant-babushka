@@ -1,9 +1,7 @@
-# Vagrant Babushka Provisioner
+# Vagrant Provisioner Babushka 
 
 Based on plugin created by @tcurdt
 https://github.com/tcurdt/vagrant-boxes/blob/master/plugins/babushka_provisioner.rb
-
-TODO: Write a gem description
 
 ## Installation
 
@@ -11,7 +9,17 @@ TODO: Write a gem description
 
 ## Usage
 
-TODO: Write usage instructions here
+In Vagrant file set provisioner to `:babushka`
+
+    config.vm.provision :babushka do |b|
+      # Path for local deps, relative to Vagrantfile.
+      # Syncronized to '/home/vagrant/babushka-deps' on guest machine
+      b.local_deps_path = '.deps' 
+      # add local dep which is defined in '.deps/htop.rb' with name 'htop'
+      b.local_dep 'htop'
+      # add remote dep in source 'tcurdt' with name 'rbenv system'
+      b.remote_dep 'tcurdt', 'rbenv system' 
+    end
 
 ## Contributing
 
