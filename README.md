@@ -21,6 +21,8 @@ In Vagrant file set provisioner to `:babushka`
       b.remote_dep 'tcurdt', 'rbenv system' 
     end
 
+Also you can add options to deps giving hash as third parameter
+
 ## Contributing
 
 1. Fork it
@@ -28,6 +30,9 @@ In Vagrant file set provisioner to `:babushka`
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+## Thanks
+[patcon](https://github.com/patcon)
 
 ## License
 
