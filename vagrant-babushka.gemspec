@@ -11,7 +11,7 @@ Gem::Specification.new do |gem|
   gem.email         = ["vladimir.valgis@gmail.com"]
   gem.description   = %q{Vagrant provisioner plugin for using Babushka}
   gem.summary       = %q{Vagrant provisioner plugin for using Babushka}
-  gem.homepage      = ""
+  gem.homepage      = "https://github.com/vvalgis/vagrant-babushka"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
