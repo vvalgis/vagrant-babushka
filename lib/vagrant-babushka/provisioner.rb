@@ -7,10 +7,11 @@ module VagrantPlugins
       end
 
       def configure(root_config)
+        @username = @machine.ssh_info[:username]
         @hostname = root_config.vm.hostname
         if @config.local_deps_path
           local_path = @config.local_deps_path
-          remote_path = '/home/vagrant/babushka-deps'
+          remote_path = "/home/#{@username}/babushka-deps"
           opts = {id: 'babushka_deps', nfs: false}
           root_config.vm.synced_folder local_path, remote_path, opts
         end
