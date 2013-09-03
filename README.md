@@ -13,7 +13,8 @@ In Vagrant file set provisioner to `:babushka`
 
     config.vm.provision :babushka do |b|
       # Path for local deps, relative to Vagrantfile.
-      # Syncronized to '/home/vagrant/babushka-deps' on guest machine
+      # Syncronized to '/home/ssh_user_name/babushka-deps' on guest machine. 
+      # 'ssh_user_name' here is 'vagrant' by default or any other name you use when connecting through ssh.
       b.local_deps_path = '.deps' 
       # add local dep which is defined in '.deps/htop.rb' with name 'htop'
       b.local_dep 'htop'
@@ -32,7 +33,8 @@ Also you can add options to deps giving hash as third parameter
 5. Create new Pull Request
 
 ## Thanks
-[patcon](https://github.com/patcon)
+[patcon](https://github.com/patcon)  
+[wakeless](https://github.com/wakeless)
 
 ## License
 
