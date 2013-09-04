@@ -12,6 +12,7 @@ Gem::Specification.new do |gem|
   gem.description   = %q{Vagrant provisioner plugin for using Babushka}
   gem.summary       = %q{Vagrant provisioner plugin for using Babushka}
   gem.homepage      = "https://github.com/vvalgis/vagrant-babushka"
+  gem.license       = 'MIT'
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
