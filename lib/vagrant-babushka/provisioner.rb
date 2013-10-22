@@ -35,7 +35,7 @@ module VagrantPlugins
         @machine.communicate.upload(local_tmpfile, remote_tmpfile)
         proxy_env = ENV.select{|k,_|/https_proxy/i.match(k)}.
           map{|k,v|[k,v].join('=')}.join(' ') rescue ''
-        run_remote "#{proxy_env} bash #{remote_tmpfile}"
+        run_remote "#{proxy_env} sh #{remote_tmpfile}"
       end
 
       def run_remote(command)
