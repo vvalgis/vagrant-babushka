@@ -12,6 +12,8 @@ https://github.com/tcurdt/vagrant-boxes/blob/master/plugins/babushka_provisioner
 In Vagrant file set provisioner to `:babushka`
 
     config.vm.provision :babushka do |b|
+      # Uncoment to override default babushka branch on bootstrap
+      #b.bootstrap_branch = 'master'
       # Path for local deps, relative to Vagrantfile.
       # Syncronized to '/home/ssh_user_name/babushka-deps' on guest machine. 
       # 'ssh_user_name' here is 'vagrant' by default or any other name you use when connecting through ssh.

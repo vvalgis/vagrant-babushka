@@ -31,7 +31,10 @@ module VagrantPlugins
         require 'net/http'
         @machine.env.ui.info("Installing babushka on #{@hostname}.")
         local_tmpfile = remote_tmpfile = "/tmp/babushka_me_up"
-        File.open(local_tmpfile, 'w') {|f| f.write `curl https://babushka.me/up` }
+        babushka_uri = 'https://babushka.me/up'
+        babushka_uri += "/#{@config.bootstrap_branch}" if @config.
+          bootstrap_branch != VagrantPlugins::Babushka::Config::UNSET_VALUE
+        File.open(local_tmpfile, 'w') {|f| f.write `curl #{babushka_uri}` }
         @machine.communicate.upload(local_tmpfile, remote_tmpfile)
         proxy_env = ENV.select{|k,_|/https_proxy/i.match(k)}.
           map{|k,v|[k,v].join('=')}.join(' ') rescue ''
