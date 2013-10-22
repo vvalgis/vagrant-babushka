@@ -7,7 +7,8 @@ module VagrantPlugins
       end
 
       def configure(root_config)
-        @username = root_config.ssh.default.username
+        @username = @machine.ssh_info[:username]
+        @username = root_config.ssh.default.username unless @username
         @hostname = root_config.vm.hostname
         if @config.local_deps_path
           local_path = @config.local_deps_path
@@ -31,14 +32,22 @@ module VagrantPlugins
         require 'net/http'
         @machine.env.ui.info("Installing babushka on #{@hostname}.")
         local_tmpfile = remote_tmpfile = "/tmp/babushka_me_up"
-        babushka_uri = 'https://babushka.me/up'
-        babushka_uri += "/#{@config.bootstrap_branch}" if @config.
-          bootstrap_branch != VagrantPlugins::Babushka::Config::UNSET_VALUE
         File.open(local_tmpfile, 'w') {|f| f.write `curl #{babushka_uri}` }
         @machine.communicate.upload(local_tmpfile, remote_tmpfile)
-        proxy_env = ENV.select{|k,_|/https_proxy/i.match(k)}.
-          map{|k,v|[k,v].join('=')}.join(' ') rescue ''
         run_remote "#{proxy_env} sh #{remote_tmpfile}"
+      end
+
+      def proxy_env
+        vars = ''
+        vars_from_env = ENV.select { |k, _| /https_proxy/i.match(k) }
+        vars = vars_from_env.to_a.map{ |pair| pair.join('=') }.join(' ') unless vars_from_env.empty?
+        vars
+      end
+
+      def babushka_uri
+        uri = 'https://babushka.me/up'
+        uri = "#{uri}/#{@config.bootstrap_branch}" unless @config.bootstrap_branch.nil?
+        uri
       end
 
       def run_remote(command)
