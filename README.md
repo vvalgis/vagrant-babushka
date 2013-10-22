@@ -13,7 +13,7 @@ In Vagrant file set provisioner to `:babushka`
 
     config.vm.provision :babushka do |b|
       # Uncoment to override default babushka branch on bootstrap
-      #b.bootstrap_branch = 'master'
+      # b.bootstrap_branch = 'master'
       # Path for local deps, relative to Vagrantfile.
       # Syncronized to '/home/ssh_user_name/babushka-deps' on guest machine. 
       # 'ssh_user_name' here is 'vagrant' by default or any other name you use when connecting through ssh.
@@ -36,7 +36,8 @@ Also you can add options to deps giving hash as third parameter
 
 ## Thanks
 [patcon](https://github.com/patcon)  
-[wakeless](https://github.com/wakeless)
+[wakeless](https://github.com/wakeless)  
+[Val](https://github.com/Val)
 
 ## License
 
