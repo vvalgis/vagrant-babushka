@@ -7,7 +7,7 @@ module VagrantPlugins
       end
 
       def configure(root_config)
-        @username = root_config.ssh.username
+        @username = root_config.ssh.username || root_config.ssh.default.username
         @hostname = root_config.vm.hostname
         if @config.local_deps_path
           local_path = @config.local_deps_path
