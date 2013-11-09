@@ -1,3 +1,9 @@
+begin
+  require "vagrant"
+rescue LoadError
+  raise "vagrant-babushka must be loaded from within Vagrant."
+end
+
 module VagrantPlugins
   module Babushka
     class Provisioner < Vagrant.plugin("2", :provisioner)
