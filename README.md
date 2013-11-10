@@ -1,30 +1,50 @@
-# Vagrant Provisioner Babushka 
+# Vagrant Provisioner Babushka
 
-Based on plugin created by @tcurdt
-https://github.com/tcurdt/vagrant-boxes/blob/master/plugins/babushka_provisioner.rb
+A [Vagrant][1] plugin which allows virtual machines to be provisioned
+using [Babushka][2].
+
+Based on a [plugin concept][3] by @tcurdt.
+
+[1]: <https://www.vagrantup.com>
+[2]: <https://babushka.me>
+[3]: <https://github.com/tcurdt/vagrant-boxes/blob/master/plugins/babushka_provisioner.rb>
+
 
 ## Installation
 
-    $ vagrant plugin install vagrant-babushka
+```bash
+vagrant plugin install vagrant-babushka
+```
+
 
 ## Usage
 
-In Vagrant file set provisioner to `:babushka`
+Add a Babushka provision block to your project's Vagrantfile:
 
-    config.vm.provision :babushka do |b|
-      # Uncoment to override default babushka branch on bootstrap
-      # b.bootstrap_branch = 'master'
-      # Path for local deps, relative to Vagrantfile.
-      # Syncronized to '/home/ssh_user_name/babushka-deps' on guest machine. 
-      # 'ssh_user_name' here is 'vagrant' by default or any other name you use when connecting through ssh.
-      b.local_deps_path = '.deps' 
-      # add local dep which is defined in '.deps/htop.rb' with name 'htop'
-      b.local_dep 'htop'
-      # add remote dep in source 'tcurdt' with name 'rbenv system'
-      b.remote_dep 'tcurdt', 'rbenv system' 
-    end
+```ruby
+config.vm.provision :babushka do |babushka|
+  # Set the Git branch of Babushka to install on the guest (defaults to master)
+  babushka.bootstrap_branch = 'master'
 
-Also you can add options to deps giving hash as third parameter
+  # Share a directory of local Babushka deps with the VM
+  # This example shares the '.deps/' directory (relative to this
+  # Vagrantfile) to '~/babushka-deps' on the guest machine (in the home
+  # directory of the main SSH user on the guest)
+  babushka.local_deps_path = '.deps'
+
+  # Meet a local dep
+  # Assuming a dep named 'htop' is defined in a file under './.deps'
+  babushka.local_dep 'htop'
+
+  # Meet a remote dep
+  # Assuming source 'tcurdt' has a dep named 'rbenv system'
+  babushka.remote_dep 'tcurdt', 'rbenv system'
+
+  # Also, you can set options for deps, using a hash as the third parameter
+  babushka.remote_dep 'tcurdt', 'rbenv system', :path => '/opt/rbenv'
+end
+```
+
 
 ## Contributing
 
@@ -34,10 +54,13 @@ Also you can add options to deps giving hash as third parameter
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
+
 ## Thanks
-[patcon](https://github.com/patcon)  
-[wakeless](https://github.com/wakeless)  
+
+[patcon](https://github.com/patcon)
+[wakeless](https://github.com/wakeless)
 [Val](https://github.com/Val)
+
 
 ## License
 

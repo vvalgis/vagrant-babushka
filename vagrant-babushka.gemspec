@@ -9,8 +9,8 @@ Gem::Specification.new do |gem|
   gem.platform      = Gem::Platform::RUBY
   gem.authors       = ["Vladimir Valgis"]
   gem.email         = ["vladimir.valgis@gmail.com"]
-  gem.description   = %q{Vagrant provisioner plugin for using Babushka}
-  gem.summary       = %q{Vagrant provisioner plugin for using Babushka}
+  gem.description   = "A Vagrant plugin which allows virtual machines to be provisioned using Babushka."
+  gem.summary       = "A Babushka provisioner for Vagrant"
   gem.homepage      = "https://github.com/vvalgis/vagrant-babushka"
   gem.license       = 'MIT'
 
@@ -18,4 +18,7 @@ Gem::Specification.new do |gem|
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
+
+  gem.add_development_dependency "bundler", "~> 1.3"
+  gem.add_development_dependency "rake"
 end

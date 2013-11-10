@@ -1,5 +1,12 @@
+begin
+  require "vagrant"
+rescue LoadError
+  raise "vagrant-babushka must be loaded from within Vagrant."
+end
+
 module VagrantPlugins
   module Babushka
+    # The main implementation class for the Babushka provisioner
     class Provisioner < Vagrant.plugin("2", :provisioner)
 
       def initialize(machine, config)
@@ -17,6 +24,9 @@ module VagrantPlugins
         end
       end
 
+      # This is the method called when the actual provisioning should
+      # be done. The communicator is guaranteed to be ready at this
+      # point, and any shared folders or networds are already set up.
       def provision
         bootstrap_babushka! unless @machine.communicate.test('babushka --version')
         @config.deps.map do |(dep_source, dep_name, dep_args)|
@@ -27,6 +37,7 @@ module VagrantPlugins
 
       private
 
+      # Installs Babushka on the guest using the bootstrap script
       def bootstrap_babushka!
         require 'net/http'
         @machine.env.ui.info("Installing babushka on #{@hostname}.")
@@ -36,6 +47,7 @@ module VagrantPlugins
         run_remote "#{proxy_env} sh #{remote_tmpfile}"
       end
 
+      # Extracts the HTTPS proxy from the host environment variables
       def proxy_env
         vars = ''
         vars_from_env = ENV.select { |k, _| /https_proxy/i.match(k) }
@@ -43,12 +55,16 @@ module VagrantPlugins
         vars
       end
 
+      # Retrieves the URL to use to bootstrap Babushka on the guest
       def babushka_uri
         uri = 'https://babushka.me/up'
         uri = "#{uri}/#{@config.bootstrap_branch}" unless @config.bootstrap_branch.nil?
         uri
       end
 
+      # Executes a command on the guest and handles logging the output
+      #
+      #   * command: The command to execute (as a string)
       def run_remote(command)
         @machine.communicate.sudo(command) do |type, data|
           color = type == :stdout ? :green : :red
