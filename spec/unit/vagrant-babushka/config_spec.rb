@@ -48,4 +48,18 @@ describe VagrantPlugins::Babushka::Config do
       ]
     end
   end
+
+  describe "#meet" do
+    before {
+      subject.meet 'test1', :source => 'user1', :params => {:abc => :def}
+      subject.meet 'test2', :source => 'user2', :params => {:ghi => :jkl}
+    }
+
+    it "should store the deps correctly" do
+      expect(subject.deps).to eq [
+        VagrantPlugins::Babushka::Dep.new('test1', :params => {:abc => :def}, :source => 'user1'),
+        VagrantPlugins::Babushka::Dep.new('test2', :params => {:ghi => :jkl}, :source => 'user2'),
+      ]
+    end
+  end
 end

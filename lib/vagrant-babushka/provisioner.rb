@@ -28,6 +28,7 @@ module VagrantPlugins
       # be done. The communicator is guaranteed to be ready at this
       # point, and any shared folders or networds are already set up.
       def provision
+        render_messages!
         bootstrap_babushka! unless @machine.communicate.test('babushka --version')
         @config.deps.map do |dep|
           run_remote "babushka --update --defaults --color #{dep.command}"
@@ -35,6 +36,19 @@ module VagrantPlugins
       end
 
       private
+      # Renders the messages to the log output
+      #
+      # The config object maintains a list of "messages" to be shown
+      # when provisioning occurs, since there's no way to show messages
+      # at the time of configuration actually occurring. This displays
+      # the messages that were saved.
+      def render_messages!
+        @config.messages.each do |(level, info, caller)|
+          info = "vagrant-babushka: #{info}"
+          info += "\nIn #{caller.first}" unless caller.nil?
+          @machine.env.ui.send level.to_sym, info.to_s, :scope => @machine.name
+        end
+      end
 
       # Installs Babushka on the guest using the bootstrap script
       def bootstrap_babushka!
