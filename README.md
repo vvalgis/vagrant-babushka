@@ -34,6 +34,22 @@ config.vm.provision :babushka do |babushka|
 
   # Meet a local dep
   # Assuming a dep named 'htop' is defined in a file under './.deps'
+  babushka.meet 'htop'
+
+  # Meet a remote dep
+  # Assuming source 'tcurdt' has a dep named 'rbenv system'
+  babushka.meet 'rbenv system', :source => 'tcurdt'
+
+  # Also, you can set options for deps
+  babushka.meet 'rbenv system', :params => {:key => "value"}
+  # or for remote dep
+  babushka.meet 'rbenv system', :source => 'tcurdt', :params => {:key => "value"}
+
+
+  # Old, **DEPRECATED**, but working syntax
+
+  # Meet a local dep
+  # Assuming a dep named 'htop' is defined in a file under './.deps'
   babushka.local_dep 'htop'
 
   # Meet a remote dep
@@ -57,10 +73,10 @@ end
 
 ## Thanks
 
-[patcon](https://github.com/patcon)
-[wakeless](https://github.com/wakeless)
-[Val](https://github.com/Val)
-
+[patcon](https://github.com/patcon)  
+[wakeless](https://github.com/wakeless)  
+[Val](https://github.com/Val)  
+[bradfeehan](https://github.com/bradfeehan)  
 
 ## License
 

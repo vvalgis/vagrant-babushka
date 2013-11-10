@@ -7,7 +7,7 @@ Gem::Specification.new do |gem|
   gem.name          = "vagrant-babushka"
   gem.version       = VagrantPlugins::Babushka::VERSION
   gem.platform      = Gem::Platform::RUBY
-  gem.authors       = ["Vladimir Valgis"]
+  gem.authors       = ["Vladimir Valgis", "Brad Feehan"]
   gem.email         = ["vladimir.valgis@gmail.com"]
   gem.description   = "A Vagrant plugin which allows virtual machines to be provisioned using Babushka."
   gem.summary       = "A Babushka provisioner for Vagrant"
