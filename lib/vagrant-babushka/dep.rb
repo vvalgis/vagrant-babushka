@@ -75,7 +75,7 @@ module VagrantPlugins
       private
         # Alias for Shellwords.escape
         def escape(string)
-          Shellwords.escape(string)
+          Shellwords.escape(string.to_s)
         end
     end
   end
