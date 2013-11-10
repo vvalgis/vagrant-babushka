@@ -30,18 +30,18 @@ module VagrantPlugins
       # Meets a local dep on the guest
       #
       #   * dep_name: The name of the dep to meet
-      #   * args:     Parameter options to pass to the dep (optional)
-      def local_dep(dep_name, args = {})
-        @deps << ['', dep_name, args]
+      #   * params:    Parameter options to pass to the dep (optional)
+      def local_dep(dep_name, params = {})
+        @deps << Dep.new(dep_name, :params => params)
       end
 
       # Meets a remote dep on the guest
       #
       #  * source:   The name of the dep's source (GitHub username)
       #  * dep_name: The name of the dep to meet
-      #  * args:     Parameter options to pass to the dep (optional)
-      def remote_dep(source, dep_name, args = {})
-        @deps << ["#{source}:", dep_name, args]
+      #  * params:   Parameter options to pass to the dep (optional)
+      def remote_dep(source, dep_name, params = {})
+        @deps << Dep.new(dep_name, :source => source, :params => params)
       end
     end
   end

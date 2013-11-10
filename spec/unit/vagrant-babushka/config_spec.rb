@@ -29,8 +29,8 @@ describe VagrantPlugins::Babushka::Config do
 
     it "should store the deps correctly" do
       expect(subject.deps).to eq [
-        ['', 'foobar', {:baz => :qux}],
-        ['', 'testme', {:one => :two}],
+        VagrantPlugins::Babushka::Dep.new('foobar', :params => {:baz => :qux}),
+        VagrantPlugins::Babushka::Dep.new('testme', :params => {:one => :two}),
       ]
     end
   end
@@ -43,8 +43,8 @@ describe VagrantPlugins::Babushka::Config do
 
     it "should store the deps correctly" do
       expect(subject.deps).to eq [
-        ['user1:', 'foobar', {:baz => :qux}],
-        ['user2:', 'testme', {:one => :two}],
+        VagrantPlugins::Babushka::Dep.new('foobar', :params => {:baz => :qux}, :source => 'user1'),
+        VagrantPlugins::Babushka::Dep.new('testme', :params => {:one => :two}, :source => 'user2'),
       ]
     end
   end

@@ -29,9 +29,8 @@ module VagrantPlugins
       # point, and any shared folders or networds are already set up.
       def provision
         bootstrap_babushka! unless @machine.communicate.test('babushka --version')
-        @config.deps.map do |(dep_source, dep_name, dep_args)|
-          args = dep_args.to_a.map { |k, v| "#{k}='#{v}'" }.join(' ')
-          run_remote "babushka --update --defaults --colour #{dep_source}'#{dep_name}' #{args}"
+        @config.deps.map do |dep|
+          run_remote "babushka --update --defaults --color #{dep.command}"
         end
       end
 
