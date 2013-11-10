@@ -2,7 +2,7 @@ module VagrantPlugins
   module Babushka
     # Main configuration object for Vagrant Babushka provisioner
     class Config < Vagrant.plugin("2", :config)
-      attr_accessor :args, :deps, :local_deps_path, :bootstrap_branch
+      attr_accessor :deps, :local_deps_path, :bootstrap_branch
       attr_reader :messages
 
       def initialize
