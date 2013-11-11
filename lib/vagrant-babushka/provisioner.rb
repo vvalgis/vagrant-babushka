@@ -14,6 +14,19 @@ module VagrantPlugins
           local_path = @config.local_deps_path
           remote_path = "/home/#{@username}/babushka-deps"
           opts = {id: 'babushka_deps', nfs: false}
+
+          # Show deprecation notice
+          info = [
+            "vagrant-babushka: Use of #local_deps_path is deprecated\n",
+            "The same effect can be achieved by adding this line:\n\n",
+            "    config.vm.synced_folder #{local_path.inspect}, ",
+            "#{remote_path.inspect}, #{opts.inspect}\n\n",
+            "to your Vagrantfile, outside the provisioner block.\n",
+            "The benefit of this is greater control over the shared\n",
+            "folder, such as using NFS or changing other options."
+          ].join
+          @machine.env.ui.warn info, :scope => @machine.name
+
           root_config.vm.synced_folder local_path, remote_path, opts
         end
       end
