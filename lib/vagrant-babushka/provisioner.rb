@@ -1,7 +1,28 @@
+require 'forwardable'
+
 module VagrantPlugins
   module Babushka
     # The main implementation class for the Babushka provisioner
     class Provisioner < Vagrant.plugin("2", :provisioner)
+
+      # Exception raised if cURL isn't on the VM and can't be installed
+      class CurlMissing < Vagrant::Errors::VagrantError
+        error_message [
+          "cURL couldn't be found on the VM, and this plugin ",
+          "doesn't know how to install it on the guest OS.\n",
+          "Try installing it manually, or consider adding the ",
+          "functionality to the plugin and opening a pull request.",
+        ].join
+      end
+
+      # Allow delegation of methods to an accessor
+      extend Forwardable
+
+      # Delegate some methods to @machine (to reduce boilerplate)
+      delegate [:communicate, :env, :name] => :@machine
+      delegate :ui => :env
+
+      attr_accessor :username, :group
 
       # Called with the root configuration of the machine so the
       # provisioner can add some configuration on top of the machine.
@@ -14,76 +35,213 @@ module VagrantPlugins
       # that.
       def configure(root_config)
         @username = root_config.ssh.username || root_config.ssh.default.username
-        @hostname = root_config.vm.hostname
-        if @config.local_deps_path
-          local_path = @config.local_deps_path
-          remote_path = "/home/#{@username}/babushka-deps"
-          opts = {id: 'babushka_deps', nfs: false}
-          root_config.vm.synced_folder local_path, remote_path, opts
-        end
+        share_local_deps(root_config) if config.local_deps_path
       end
 
       # This is the method called when the actual provisioning should
       # be done. The communicator is guaranteed to be ready at this
       # point, and any shared folders or networds are already set up.
       def provision
-        render_messages!
-        bootstrap_babushka! unless @machine.communicate.test('babushka --version')
-        @config.deps.map do |dep|
-          run_remote "babushka --update --defaults --color #{dep.command}"
-        end
+        detect_ssh_group
+        render_messages
+        prepare
+        do_babushka_run
       end
 
-      private
+      # Shares local deps with the virtual machine
+      def share_local_deps(root_config)
+        local_path = config.local_deps_path
+        remote_path = "~#{escape username}/babushka-deps"
+        opts = {:id => 'babushka_deps', :nfs => false}
+        root_config.vm.synced_folder local_path, remote_path, opts
+      end
+
+      # Determines and saves the name of the SSH user's primary group
+      def detect_ssh_group
+        @group = ""
+
+        # Save stdout into @group
+        communicate.execute("id -gn #{escape username}") do |type, data|
+          @group += data if type == :stdout
+        end
+
+        # Remove trailing newline from command output
+        @group.gsub! /\n\Z/, ""
+      end
+
       # Renders the messages to the log output
       #
       # The config object maintains a list of "messages" to be shown
       # when provisioning occurs, since there's no way to show messages
       # at the time of configuration actually occurring. This displays
       # the messages that were saved.
-      def render_messages!
-        @config.messages.each do |(level, info, caller)|
+      def render_messages
+        config.messages.each do |(level, info, caller)|
           info = "vagrant-babushka: #{info}"
           info += "\nIn #{caller.first}" unless caller.nil?
-          @machine.env.ui.send level.to_sym, info.to_s, :scope => @machine.name
+          ui.send level.to_sym, info.to_s, :scope => name
         end
       end
 
-      # Installs Babushka on the guest using the bootstrap script
-      def bootstrap_babushka!
-        require 'net/http'
-        @machine.env.ui.info("Installing babushka on #{@hostname}.")
-        local_tmpfile = remote_tmpfile = "/tmp/babushka_me_up"
-        File.open(local_tmpfile, 'w') {|f| f.write `curl #{babushka_uri}` }
-        @machine.communicate.upload(local_tmpfile, remote_tmpfile)
-        run_remote "#{proxy_env} sh #{remote_tmpfile}"
-      end
-
-      # Extracts the HTTPS proxy from the host environment variables
-      def proxy_env
-        vars = ''
-        vars_from_env = ENV.select { |k, _| /https_proxy/i.match(k) }
-        vars = vars_from_env.to_a.map{ |pair| pair.join('=') }.join(' ') unless vars_from_env.empty?
-        vars
-      end
-
-      # Retrieves the URL to use to bootstrap Babushka on the guest
-      def babushka_uri
-        uri = 'https://babushka.me/up'
-        uri = "#{uri}/#{@config.bootstrap_branch}" unless @config.bootstrap_branch.nil?
-        uri
-      end
-
-      # Executes a command on the guest and handles logging the output
+      # Performs preparation necessary before Babushka can be invoked
       #
-      #   * command: The command to execute (as a string)
-      def run_remote(command)
-        @machine.communicate.sudo(command) do |type, data|
-          color = type == :stdout ? :green : :red
-          @machine.env.ui.info(data.chomp, :color => color, :prefix => false)
+      # Installs Babushka if it's not available. If Babushka needs to
+      # be installed, cURL will be installed first so that Babushka
+      # can be downloaded over HTTPS (as wget may not support HTTPS).
+      def prepare
+        unless in_path? "babushka"
+          # Install cURL first to ensure we can download over HTTPS
+          install_curl! unless in_path? "curl"
+          create_destination!
+          install_babushka!
+          ui.info "\n\n\n"
         end
       end
 
+      # Invokes Babushka on the virtual machine to meet requested deps
+      #
+      # Since Babushka can only meet one dep at a time, if multiple
+      # deps are in the meet list (the user has requested multiple
+      # deps to be run) then we have to have multiple invokations,
+      # once for each dep.
+      def do_babushka_run
+        if config.deps.empty?
+          ui.warn [
+            "Didn't find any Babushka deps to be met on the VM.",
+            "Add some to your Vagrantfile: babushka.meet 'my dep'",
+          ].join("\n"), :scope => name
+        else
+          ui.info "Provisioning VM using Babushka...", :scope => name
+          config.deps.each do |dep|
+            ui.info "Meeting Babushka dep '#{dep.id}'", :scope => name
+            ui.info "Executing '#{command_for(dep).strip}'...", :scope => name
+            communicate.execute command_for(dep), &log_stdout
+          end
+        end
+      end
+
+      private
+        # Determines if the virtual machine has a command in its $PATH
+        #
+        #   command: The name of the command to look for
+        def in_path?(command)
+          communicate.test("which #{escape command}").tap do |result|
+            if result
+              ui.info "'#{command}' found on guest", :scope => name
+            end
+          end
+        end
+
+        # Installs cURL on the virtual machine
+        def install_curl!
+          raise CurlMissing.new unless in_path? "apt-get"
+          ui.info "Installing cURL package on VM...", :scope => name
+          communicate.sudo "apt-get --quiet --assume-yes install curl"
+        end
+
+        # Creates the Babushka installation directory on the VM
+        #
+        # This will create the directory (as root), then set up the
+        # permissions on it to belong to the SSH user's primary group,
+        # and give the group read and write privileges. The permissions
+        # are also adjusted on /usr/local/bin, so Babushka can symlink
+        # itself into the PATH.
+        def create_destination!
+          ui.info "Creating Babushka directory...", :scope => name
+          communicate.sudo [
+            # Create directory, and parent directories if also missing
+            "mkdir -p /usr/local/babushka",
+
+            # Change Babushka directory's group to user's primary group
+            "chgrp #{escape group} /usr/local/babushka /usr/local/bin",
+
+            # Add read/write privileges where Babushka needs them
+            "chmod g+rw /usr/local/babushka /usr/local/bin",
+          ].join(" && ")
+        end
+
+        # Installs Babushka on the virtual machine
+        def install_babushka!
+          ui.info [
+            "Installing Babushka via bootstrap script at ",
+            config.bootstrap_url, "...",
+          ].join, :scope => name
+
+          unless config.bootstrap_url =~ %r[^https://]
+            ui.warn "WARNING: Using non-SSL source", :scope => name
+          end
+
+          # Log stdout straight to Vagrant's output
+          communicate.execute install_babushka_command, &log_stdout
+        end
+
+        # The command used to install Babushka on the virtual machine
+        def install_babushka_command
+          %Q[#{vars} sh -c "`#{vars} curl #{escape config.bootstrap_url}`"]
+        end
+
+        # Retrieves the environment variables to use for VM commands
+        #
+        # Extracts the HTTPS proxy from the host environment variables
+        #
+        # Returns a string that can be used as a prefix to a command in
+        # order to assign the variables for that command.
+        def vars
+          proxy_env = ENV.select {|k, _| /https_proxy/i.match(k) }
+          proxy_env.map{|k, v| "#{escape k}=#{escape v}" }.join(" ")
+        end
+
+        # A block that logs stdout, when passed to a communicator
+        #
+        #   type: The stream where the output in data came from, one of
+        #         :stdout or :stderr
+        #   data: The echoed data as a string
+        def log_stdout
+          lambda do |type, data|
+            ui.info data, :new_line => false if type == :stdout
+          end
+        end
+
+        # Creates a command string to use for a dep on the command line
+        #
+        # This will return a string which can be used as a command to
+        # run Babushka to meet a particular dep.
+        #
+        #   * dep: The Dep to generate the command string for
+        def command_for(dep)
+          [
+            vars, "babushka", "meet",
+            args_for(dep),  # Babushka command-line arguments
+            escape(dep.id), # Identifier for the dep to be met
+            dep.params.map {|k, v| "#{escape k}=#{escape v}" },
+          ].flatten.join(" ")
+        end
+
+        # Generates the Babushka command-line arguments for a dep
+        #
+        # Given a dep, this method merges the configuration options for
+        # the specific dep with the configuration of the provisioner as
+        # "defaults" if values aren't set on the dep itself.
+        #
+        #   * dep: The Dep to generate the command string for
+        def args_for(dep)
+          result = config.arguments.merge(dep.arguments)
+          result[:color] = ui.is_a? Vagrant::UI::Colored if result[:color].nil?
+          [
+            '--defaults', # Must use defaults -- stdin not connected
+            result[:color]     ? '--color'     : '--no-color',
+            result[:debug]     ? '--debug'     : nil,
+            result[:dry_run]   ? '--dry-run'   : nil,
+            result[:show_args] ? '--show-args' : nil,
+            result[:silent]    ? '--silent'    : nil,
+            result[:update]    ? '--update'    : nil,
+          ].compact.join(" ") # Remove nil values and concatenate
+        end
+
+        # Alias for Shellwords.escape
+        def escape(string)
+          Shellwords.escape(string.to_s)
+        end
     end
   end
 end

@@ -21,11 +21,6 @@ describe VagrantPlugins::Babushka::Dep do
     it { should be_nil }
   end
 
-  describe "#command" do
-    subject { dep.command }
-    it { should eq "the\\ dep" }
-  end
-
   context "with source" do
     let(:options) { {:source => source} }
     let(:source) { double "source", :to_s => "the source" }
@@ -39,11 +34,6 @@ describe VagrantPlugins::Babushka::Dep do
       subject { dep.source }
       it { should eq source.to_s }
     end
-
-    describe "#command" do
-      subject { dep.command }
-      it { should eq "the\\ source:the\\ dep" }
-    end
   end
 
   context "with params" do
@@ -52,22 +42,18 @@ describe VagrantPlugins::Babushka::Dep do
 
     describe "#params" do
       subject { dep.params }
-    end
-
-    describe "#command" do
-      subject { dep.command }
-      it { should eq "the\\ dep foo=bar baz=qux" }
+      it { should be params }
     end
   end
 
-  context "with source and params" do
-    let(:options) { {:params => params, :source => source} }
-    let(:params) { {:foo => :bar, :baz => :qux} }
-    let(:source) { double "source", :to_s => "the source" }
+  context "with arguments" do
+    let(:options) { {:color => color, :source => source} }
+    let(:color) { double "color" }
+    let(:source) { double "source" }
 
-    describe "#command" do
-      subject { dep.command }
-      it { should eq "the\\ source:the\\ dep foo=bar baz=qux" }
+    describe "#arguments" do
+      subject { dep.arguments }
+      it { should eq({:color => color})  }
     end
   end
 end
