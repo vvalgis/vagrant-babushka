@@ -7,6 +7,15 @@ module VagrantPlugins
         super
       end
 
+      # Called with the root configuration of the machine so the
+      # provisioner can add some configuration on top of the machine.
+      #
+      # During this step, and this step only, the provisioner should
+      # modify the root machine configuration to add any additional
+      # features it may need. Examples include sharing folders,
+      # networking, and so on. This step is guaranteed to be called
+      # before any of those steps are done so the provisioner may do
+      # that.
       def configure(root_config)
         @username = root_config.ssh.username || root_config.ssh.default.username
         @hostname = root_config.vm.hostname
