@@ -3,10 +3,6 @@ module VagrantPlugins
     # The main implementation class for the Babushka provisioner
     class Provisioner < Vagrant.plugin("2", :provisioner)
 
-      def initialize(machine, config)
-        super
-      end
-
       # Called with the root configuration of the machine so the
       # provisioner can add some configuration on top of the machine.
       #
