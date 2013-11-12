@@ -2,15 +2,32 @@ module VagrantPlugins
   module Babushka
     # Main configuration object for Vagrant Babushka provisioner
     class Config < Vagrant.plugin("2", :config)
-      attr_accessor :args, :deps, :local_deps_path, :bootstrap_branch
+      # Configuration keys that are used as Babushka command-line args
+      ARGUMENTS = [
+        :color,
+        :debug,
+        :dry_run,
+        :show_args,
+        :silent,
+        :update,
+      ]
+
+      attr_accessor :deps, :local_deps_path, :bootstrap_branch, :bootstrap_url
       attr_reader :messages
+
+      # Command-line argument options
+      attr_accessor *ARGUMENTS
 
       def initialize
         super
         @deps = []
         @local_deps_path = UNSET_VALUE
         @bootstrap_branch = UNSET_VALUE
+        @bootstrap_url = UNSET_VALUE
         @messages = []
+
+        # Reset all argument values to UNSET_VALUE
+        ARGUMENTS.each {|a| self.send "#{a}=".to_sym, UNSET_VALUE }
       end
 
       # This is called as a last-minute hook that allows the
@@ -21,6 +38,29 @@ module VagrantPlugins
         @deps = [] if @deps == UNSET_VALUE
         @local_deps_path  = nil if @local_deps_path  == UNSET_VALUE
         @bootstrap_branch = nil if @bootstrap_branch == UNSET_VALUE
+
+        # Setup bootstrap URL if not set
+        if @bootstrap_url == UNSET_VALUE
+          @bootstrap_url = "https://babushka.me/up"
+          @bootstrap_url += "/#{@bootstrap_branch}" if @bootstrap_branch
+        end
+
+        # Set defaults for command-line arguments
+        @color = nil if @color == UNSET_VALUE
+        @debug = false if @debug == UNSET_VALUE
+        @dry_run = false if @dry_run == UNSET_VALUE
+        @show_args = false if @show_args == UNSET_VALUE
+        @silent = false if @silent == UNSET_VALUE
+        @update = true if @update == UNSET_VALUE
+      end
+
+      # Retrieves a Hash of the command-line argument config values
+      #
+      # The returned Hash will have command-line argument names for
+      # keys, and the value for the argument as the corresponding
+      # value.
+      def arguments
+        ARGUMENTS.inject(Hash.new) {|hash, key| hash.merge({key => send(key)}) }
       end
 
       # Meets a local dep on the guest

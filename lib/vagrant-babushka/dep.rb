@@ -52,13 +52,13 @@ module VagrantPlugins
         @options[:params] || Hash.new
       end
 
-      # Creates a command string to use for this dep on the command line
+      # Retrieves the command-line arguments for the dep
       #
-      # This will return a string which can be used as an argument to
-      # "babushka meet" to meet this dep with its parameters.
-      def command
-        values = params.map {|k, v| "#{escape k}=#{escape v}" }
-        [escape(id), values].flatten.join(" ")
+      # This returns a hash including all the Babushka command-line
+      # arguments (to override the global settings) when meeting this
+      # dep.
+      def arguments
+        @options.select {|key, value| Config::ARGUMENTS.include? key }
       end
 
       def ==(other)
@@ -70,12 +70,6 @@ module VagrantPlugins
         # An array of state data used to compare and test for equality
         def state
           [@dep_name, @options[:params], @options[:source]]
-        end
-
-      private
-        # Alias for Shellwords.escape
-        def escape(string)
-          Shellwords.escape(string.to_s)
         end
     end
   end
