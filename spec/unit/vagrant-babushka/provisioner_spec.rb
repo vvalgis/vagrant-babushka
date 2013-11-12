@@ -107,9 +107,9 @@ describe VagrantPlugins::Babushka::Provisioner do
 
       it "should meet the deps" do
         expect(ui).to receive(:info).with("Provisioning VM using Babushka...", :scope => "the name")
-        expect(ui).to receive(:info).with("Meeting Babushka dep the dep 1", :scope => "the name")
+        expect(ui).to receive(:info).with("Meeting Babushka dep 'the dep 1'", :scope => "the name")
         expect(ui).to receive(:info).with("Executing 'foo'...", :scope => "the name")
-        expect(ui).to receive(:info).with("Meeting Babushka dep the dep 2", :scope => "the name")
+        expect(ui).to receive(:info).with("Meeting Babushka dep 'the dep 2'", :scope => "the name")
         expect(ui).to receive(:info).with("Executing 'bar'...", :scope => "the name")
         expect(provisioner).to receive(:command_for).with(dep1).twice().and_return("foo")
         expect(communicate).to receive(:execute).with("foo")
