@@ -2,7 +2,7 @@ module VagrantPlugins
   module Babushka
     class Plugin < Vagrant.plugin("2")
       name "Babushka"
-      description <<-END
+      description <<-END.gsub(/ {6}|\n\Z/, "")
         Provides support for provisioning your virtual machines using
         Babushka.
       END

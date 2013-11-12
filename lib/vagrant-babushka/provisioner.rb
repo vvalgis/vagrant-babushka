@@ -7,12 +7,13 @@ module VagrantPlugins
 
       # Exception raised if cURL isn't on the VM and can't be installed
       class CurlMissing < Vagrant::Errors::VagrantError
-        error_message [
-          "cURL couldn't be found on the VM, and this plugin ",
-          "doesn't know how to install it on the guest OS.\n",
-          "Try installing it manually, or consider adding the ",
-          "functionality to the plugin and opening a pull request.",
-        ].join
+        error_message <<-END.gsub(/ {8}|\n\Z/, "")
+          cURL couldn't be found on the VM, and this plugin doesn't
+          know how to install it on the guest OS.
+
+          Try installing it manually, or consider adding the
+          functionality to the plugin and opening a pull request.
+        END
       end
 
       # Allow delegation of methods to an accessor
@@ -106,10 +107,10 @@ module VagrantPlugins
       # once for each dep.
       def do_babushka_run
         if config.deps.empty?
-          ui.warn [
-            "Didn't find any Babushka deps to be met on the VM.",
-            "Add some to your Vagrantfile: babushka.meet 'my dep'",
-          ].join("\n"), :scope => name
+          ui.warn <<-END.gsub(/ {12}|\n\Z/, ""), :scope => name
+            Didn't find any Babushka deps to be met on the VM.
+            Add some to your Vagrantfile: babushka.meet 'my dep'
+          END
         else
           ui.info "Provisioning VM using Babushka...", :scope => name
           config.deps.each do |dep|
@@ -162,10 +163,10 @@ module VagrantPlugins
 
         # Installs Babushka on the virtual machine
         def install_babushka!
-          ui.info [
-            "Installing Babushka via bootstrap script at ",
-            config.bootstrap_url, "...",
-          ].join, :scope => name
+          ui.info <<-END.gsub(/ {12}|\n\Z/, ""), :scope => name
+            Installing Babushka via bootstrap script at \
+            #{config.bootstrap_url}...
+          END
 
           unless config.bootstrap_url =~ %r[^https://]
             ui.warn "WARNING: Using non-SSL source", :scope => name

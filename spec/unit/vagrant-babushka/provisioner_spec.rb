@@ -92,10 +92,10 @@ describe VagrantPlugins::Babushka::Provisioner do
 
     context "with no deps specified" do
       it "should log a warning" do
-        expect(ui).to receive(:warn).with([
-          "Didn't find any Babushka deps to be met on the VM.",
-          "Add some to your Vagrantfile: babushka.meet 'my dep'",
-        ].join("\n"), :scope => "the name")
+        expect(ui).to receive(:warn).with(<<-END.gsub(/ {10}|\n\Z/, ""), :scope => "the name")
+          Didn't find any Babushka deps to be met on the VM.
+          Add some to your Vagrantfile: babushka.meet 'my dep'
+        END
         subject.do_babushka_run
       end
     end
