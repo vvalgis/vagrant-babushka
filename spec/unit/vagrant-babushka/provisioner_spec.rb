@@ -17,7 +17,7 @@ describe VagrantPlugins::Babushka::Provisioner do
 
     it "should configure the directory to be shared" do
       expect(config).to receive(:local_deps_path).and_return(local_deps_path)
-      expect(vm).to receive(:synced_folder).with(local_deps_path, "~the\\ user/babushka-deps", {:id => 'babushka_deps', :nfs => false})
+      expect(vm).to receive(:synced_folder).with(local_deps_path, "/home/the\\ user/babushka-deps", {:id => 'babushka_deps', :nfs => false})
       provisioner.username = double "username", :to_s => "the user"
       provisioner.share_local_deps root_config
       subject

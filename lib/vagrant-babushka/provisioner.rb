@@ -55,7 +55,7 @@ module VagrantPlugins
       # Shares local deps with the virtual machine
       def share_local_deps(root_config)
         local_path = config.local_deps_path
-        remote_path = "~#{escape username}/babushka-deps"
+        remote_path = "/home/#{escape username}/babushka-deps"
         opts = {:id => 'babushka_deps', :nfs => false}
         root_config.vm.synced_folder local_path, remote_path, opts
       end
