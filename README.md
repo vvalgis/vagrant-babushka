@@ -5,6 +5,8 @@ using [Babushka][2].
 
 Based on a [plugin concept][3] by @tcurdt.
 
+[![Build Status](https://travis-ci.org/vvalgis/vagrant-babushka.png)](https://travis-ci.org/vvalgis/vagrant-babushka.png)  
+
 [1]: <https://www.vagrantup.com>
 [2]: <https://babushka.me>
 [3]: <https://github.com/tcurdt/vagrant-boxes/blob/master/plugins/babushka_provisioner.rb>
