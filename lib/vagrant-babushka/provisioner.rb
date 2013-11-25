@@ -6,14 +6,16 @@ module VagrantPlugins
     class Provisioner < Vagrant.plugin("2", :provisioner)
 
       # Exception raised if cURL isn't on the VM and can't be installed
-      class CurlMissing < Vagrant::Errors::VagrantError
-        error_message <<-END.gsub(/ {8}|\n\Z/, "")
-          cURL couldn't be found on the VM, and this plugin doesn't
-          know how to install it on the guest OS.
+      class CurlMissingError < Vagrant::Errors::VagrantError
+        def error_message
+          <<-END.gsub(/ {8}|\n\Z/, "")
+            cURL couldn't be found on the VM, and this plugin doesn't
+            know how to install it on the guest OS.
 
-          Try installing it manually, or consider adding the
-          functionality to the plugin and opening a pull request.
-        END
+            Try installing it manually, or consider adding the
+            functionality to the plugin and opening a pull request.
+          END
+        end
       end
 
       # Allow delegation of methods to an accessor
@@ -135,7 +137,7 @@ module VagrantPlugins
 
         # Installs cURL on the virtual machine
         def install_curl!
-          raise CurlMissing.new unless in_path? "apt-get"
+          raise CurlMissingError.new unless in_path? "apt-get"
           ui.info "Installing cURL package on VM...", :scope => name
           communicate.sudo "apt-get --quiet --assume-yes install curl"
         end
