@@ -199,7 +199,7 @@ module VagrantPlugins
         #   data: The echoed data as a string
         def log_stdout
           lambda do |type, data|
-            ui.info data, :new_line => false if type == :stdout
+            ui.info data, :new_line => false
           end
         end
 
