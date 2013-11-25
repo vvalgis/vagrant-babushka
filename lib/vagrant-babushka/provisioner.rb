@@ -1,4 +1,5 @@
 require 'forwardable'
+require 'shellwords'
 
 module VagrantPlugins
   module Babushka
