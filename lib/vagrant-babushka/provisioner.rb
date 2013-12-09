@@ -119,7 +119,8 @@ module VagrantPlugins
           config.deps.each do |dep|
             ui.info "Meeting Babushka dep '#{dep.id}'", :scope => name
             ui.info "Executing '#{command_for(dep).strip}'...", :scope => name
-            communicate.execute command_for(dep), &log_stdout
+            options = {:error_key => "vagrant_babushka_provision_error"}
+            communicate.execute command_for(dep), options, &log_stdout
           end
         end
       end
