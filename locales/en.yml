@@ -1,0 +1,6 @@
+en:
+  vagrant:
+    errors:
+      vagrant_babushka_provision_error: |-
+        An error occurred during the last Babushka run. Please check
+        the output above for information about what went wrong.
