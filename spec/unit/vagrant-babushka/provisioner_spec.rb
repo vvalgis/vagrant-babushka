@@ -60,6 +60,7 @@ describe VagrantPlugins::Babushka::Provisioner do
         expect(provisioner).to receive(:install_curl!)
         expect(provisioner).to receive(:create_destination!)
         expect(provisioner).to receive(:install_babushka!)
+        expect(provisioner).to receive(:patch_babushka_binary!)
         expect(ui).to receive(:info).with("\n\n\n")
         subject.prepare
       end
@@ -71,6 +72,7 @@ describe VagrantPlugins::Babushka::Provisioner do
           expect(provisioner).to_not receive(:install_curl!)
           expect(provisioner).to receive(:create_destination!)
           expect(provisioner).to receive(:install_babushka!)
+          expect(provisioner).to receive(:patch_babushka_binary!)
           expect(ui).to receive(:info).with("\n\n\n")
           subject.prepare
         end

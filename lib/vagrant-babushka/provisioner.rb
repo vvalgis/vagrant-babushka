@@ -98,6 +98,7 @@ module VagrantPlugins
           install_curl! unless in_path? "curl"
           create_destination!
           install_babushka!
+          patch_babushka_binary!
           ui.info "\n\n\n"
         end
       end
@@ -178,6 +179,22 @@ module VagrantPlugins
 
           # Log stdout straight to Vagrant's output
           communicate.execute install_babushka_command, &log_stdout
+        end
+
+        # Installs the patched binary distributed with this plugin
+        #
+        # The patched binary ensures stdout and stderr are unbuffered,
+        # so they will be flushed after every write. This avoids
+        # progress bars and status messages from being hidden during
+        # long-running processes.
+        #
+        # The patched binary is at dist/babushka.rb, relative to the
+        # root of this project.
+        def patch_babushka_binary!
+          ui.info "Patching Babushka binary...", :scope => name
+          root = File.expand_path '../..', File.dirname(__FILE__)
+          source = File.join root, 'dist', 'babushka.rb'
+          communicate.upload source, '/usr/local/bin/babushka'
         end
 
         # The command used to install Babushka on the virtual machine
