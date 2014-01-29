@@ -21,6 +21,11 @@ describe VagrantPlugins::Babushka::Dep do
     it { should be_nil }
   end
 
+  describe "#sudo" do
+    subject { dep.sudo }
+    it { should be_empty }
+  end
+
   context "with source" do
     let(:options) { {:source => source} }
     let(:source) { double "source", :to_s => "the source" }
@@ -54,6 +59,15 @@ describe VagrantPlugins::Babushka::Dep do
     describe "#arguments" do
       subject { dep.arguments }
       it { should eq({:color => color})  }
+    end
+  end
+
+  context "with sudo" do
+    let(:options) { {:run_with_sudo => true} }
+
+    describe "#sudo" do
+      subject { dep.sudo }
+      it { should eq 'sudo' }
     end
   end
 end

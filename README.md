@@ -61,6 +61,11 @@ config.vm.provision :babushka do |babushka|
   # ...and for remote deps:
   babushka.meet 'rbenv system', :source => 'tcurdt', :params => {:key => "value"}
 
+  # When run_with_sudo option set to true
+  # provision will run babushka command with 'sudo' prefix
+  # on guest machine for this dep
+  babushka.meet 'postgres', :params => {:version => '9.3'}, :run_with_sudo => true
+
 
   # Old, **DEPRECATED**, but working syntax
 
