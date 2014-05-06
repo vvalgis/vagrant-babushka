@@ -43,6 +43,14 @@ module VagrantPlugins
         @options[:source] ? @options[:source].to_s : nil
       end
 
+      # Set sudo prefix for babushka command
+      #
+      # If the run_with_sudo is set to true return 'sudo' prefix, if not
+      # empty string is returned.
+      def sudo
+        @options[:run_with_sudo] ? 'sudo' : ''
+      end
+
       # Retrieves the parameters for the dep
       #
       # Parameters are values for variables that the dep accepts. This

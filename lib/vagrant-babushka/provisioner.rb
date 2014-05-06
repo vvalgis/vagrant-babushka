@@ -232,7 +232,7 @@ module VagrantPlugins
         #   * dep: The Dep to generate the command string for
         def command_for(dep)
           [
-            vars, "babushka", "meet",
+            vars, dep.sudo, "babushka", "meet",
             args_for(dep),  # Babushka command-line arguments
             escape(dep.id), # Identifier for the dep to be met
             dep.params.map {|k, v| "#{escape k}=#{escape v}" },
